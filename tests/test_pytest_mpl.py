@@ -131,8 +131,11 @@ def test_output_dir(tmpdir):
     assert os.path.exists(output_dir)
 
     # Listdir() is to get the random name that the output for the one test is written into
-    assert os.path.exists(os.path.join(output_dir, os.listdir(output_dir)[0],
-                                       'test_output_dir.png'))
+    assert os.path.exists(
+        os.path.join(
+            output_dir, os.listdir(output_dir)[0], 'test_py__test_output_dir.png',
+        )
+    )
 
 
 TEST_GENERATE = """
@@ -166,7 +169,7 @@ def test_generate(tmpdir):
                             '--mpl-generate-path={0}'.format(gen_dir),
                             test_file])
     assert code == 0
-    assert os.path.exists(os.path.join(gen_dir, 'test_gen.png'))
+    assert os.path.exists(os.path.join(gen_dir, 'test_py__test_gen.png'))
 
 
 @pytest.mark.mpl_image_compare(baseline_dir=baseline_dir_local, tolerance=20)

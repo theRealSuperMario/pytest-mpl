@@ -251,7 +251,15 @@ class ImageComparison(object):
                 # Find test name to use as plot name
                 filename = compare.kwargs.get('filename', None)
                 if filename is None:
-                    filename = item.name + '.png'
+                    # example to clarify file nameing:
+                    # tests/test_feature.py::test_works --> filename: tests__test_feature_py__test_works
+                    # test/test_feature.py::test_class::test_member01 --> filename tests__test_feature_py__test_class__test_member01
+                    subnames = item.nodeid.split('::')
+                    pathnames = subnames[0]
+                    pathnames = '__'.join(pathnames.replace('.', '_').split('/'))
+                    namespace = subnames[1:]
+                    namespace = '_'.join(namespace)
+                    filename = pathnames + '__' + namespace + '.png'
                     filename = filename.replace('[', '_').replace(']', '_')
                     filename = filename.replace('/', '_')
                     filename = filename.replace('_.png', '.png')
