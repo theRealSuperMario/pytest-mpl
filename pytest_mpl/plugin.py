@@ -241,12 +241,21 @@ class ImageComparison(object):
                     # class that is not the same as args[0], and args[0] is the
                     # one that has the correct attributes set up from setup_method
                     # so we ignore original.__self__ and use args[0] instead.
-                    fig = original.__func__(*args, **kwargs)
+                    fig_or_figures = original.__func__(*args, **kwargs)
                 else:  # function
-                    fig = original(*args, **kwargs)
+                    fig_or_figures = original(*args, **kwargs)
+
+                if isinstance(fig_or_figures, list):
+                    is_fig = [hasattr(f, "savefig") for f in fig_or_figures]
+                    if not all(is_fig):
+                        raise ValueError("return value is not a list of figures")
 
                 if remove_text:
-                    remove_ticks_and_titles(fig)
+                    if isinstance(fig_or_figures, list):
+                        for f in fig_or_figures:
+                            remove_ticks_and_titles(f)
+                    else:
+                        remove_ticks_and_titles(fig_or_figures)
 
                 # Find test name to use as plot name
                 filename = compare.kwargs.get('filename', None)
@@ -272,8 +281,15 @@ class ImageComparison(object):
                     result_dir = tempfile.mkdtemp(dir=self.results_dir)
                     test_image = os.path.abspath(os.path.join(result_dir, filename))
 
-                    fig.savefig(test_image, **savefig_kwargs)
-                    close_mpl_figure(fig)
+                    if isinstance(fig_or_figures, list):
+                        for i, f in enumerate(fig_or_figures):
+                            path, ext = os.path.splitext(test_image)
+                            current_test_image = f'{path}_{i}{ext}'
+                            f.savefig(current_test_image, **savefig_kwargs)
+                            close_mpl_figure(f)
+                    else:
+                        fig_or_figures.savefig(test_image, **savefig_kwargs)
+                        close_mpl_figure(fig_or_figures)
 
                     # Find path to baseline image
                     if baseline_remote:
@@ -319,10 +335,17 @@ class ImageComparison(object):
 
                     if not os.path.exists(self.generate_dir):
                         os.makedirs(self.generate_dir)
+                    test_image = os.path.abspath(os.path.join(self.generate_dir, filename))
 
-                    fig.savefig(os.path.abspath(os.path.join(self.generate_dir, filename)),
-                                **savefig_kwargs)
-                    close_mpl_figure(fig)
+                    if isinstance(fig_or_figures, list):
+                        for i, f in enumerate(fig_or_figures):
+                            path, ext = os.path.splitext(test_image)
+                            current_test_image = f"{path}_{i}{ext}"
+                            f.savefig(current_test_image, **savefig_kwargs)
+                            close_mpl_figure(f)
+                    else:
+                        fig_or_figures.savefig(test_image, **savefig_kwargs)
+                        close_mpl_figure(fig_or_figures)
                     pytest.skip("Skipping test, since generating data")
 
         if item.cls is not None:

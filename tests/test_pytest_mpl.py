@@ -215,6 +215,21 @@ def test_parametrized(s):
     return fig
 
 
+@pytest.mark.mpl_image_compare(baseline_dir=baseline_dir_local, remove_text=True)
+def test_multiple_figures():
+    figures = []
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    ax.scatter([1, 3, 4, 3, 2], [1, 4, 3, 3, 1])
+    figures.append(fig)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    ax.scatter([1, 3, 4, 3, 2], [1, 4, 3, 3, 1])
+    figures.append(fig)
+    return figures
+
+
 class TestClassWithSetup(object):
 
     # Regression test for a bug that occurred when using setup_method
